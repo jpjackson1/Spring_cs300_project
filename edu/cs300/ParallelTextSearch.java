@@ -7,7 +7,7 @@ public class ParallelTextSearch{
   public static void main(String[] args){
 
     int treeCount=2;
-    String[][]  samples = {{"conspicuous", "parallel", "withering"},{"coping", "figure", "parachute"}};
+    String[][]  samples = {{"conspicuous", "condiscending", "condescending"},{"coping", "figure", "parachute"}};
     ArrayBlockingQueue[] workers = new ArrayBlockingQueue[treeCount];
     ArrayBlockingQueue resultsOutputArray=new ArrayBlockingQueue(treeCount*10);
 

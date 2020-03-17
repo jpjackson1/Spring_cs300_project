@@ -47,6 +47,35 @@ public class Trie
     	return contains(prefix, false);
     }
     
+    public String findLongestWord(String prefix) {
+        TrieNode lastNode = root;
+        for (int i = 0; i < prefix.length(); i++) {
+            lastNode = lastNode.getChild(prefix.charAt(i));
+            if (lastNode == null) {
+                return "";	 
+            }
+        }
+
+        StringBuffer pre = new StringBuffer(prefix);
+        String longest = new String(longestWord(pre, lastNode));
+        return longest;
+    }
+
+    public StringBuffer longestWord(StringBuffer prefix, TrieNode node) {
+        StringBuffer longest = new StringBuffer("");
+        int maxLen = 0;
+        if (node.terminates == true) { longest = prefix; maxLen = prefix.length(); }
+        for (TrieNode child : node.children.values()) {
+            StringBuffer copy = new StringBuffer(prefix);
+            StringBuffer temp = longestWord(copy.append(child.character), child);
+            if (temp.length() > maxLen) {
+                longest = temp;
+                maxLen = temp.length();
+            }
+        }
+        return longest;
+    }
+
     public TrieNode getRoot() {
     	return root;
     }

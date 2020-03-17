@@ -23,14 +23,15 @@ class Worker extends Thread{
     //while (true){
       try {
         String prefix=(String)this.prefixRequestArray.take();
-        boolean found = this.textTrieTree.contains(prefix);
+        //boolean found = this.textTrieTree.contains(prefix);
+        String longest = this.textTrieTree.findLongestWord(prefix);
         
-        if (!found){
+        if (longest == "") {
           //System.out.println("Worker-"+this.id+" "+req.requestID+":"+ prefix+" ==> not found ");
           resultsOutputArray.put(passageName+":"+prefix+" not found");
         } else{
           //System.out.println("Worker-"+this.id+" "+req.requestID+":"+ prefix+" ==> "+word);
-          resultsOutputArray.put(passageName+":"+prefix+" found");
+          resultsOutputArray.put(passageName+":"+prefix+" found. Longest word with "+prefix+ " is "+longest);
         }
       } catch(InterruptedException e){
         System.out.println(e.getMessage());
