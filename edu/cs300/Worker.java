@@ -1,21 +1,51 @@
 package edu.cs300;
 import CtCILibrary.*;
 import java.util.concurrent.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Scanner;
 
-class Worker extends Thread{
+class Worker extends Thread {
 
   Trie textTrieTree;
-  ArrayBlockingQueue prefixRequestArray;
-  ArrayBlockingQueue resultsOutputArray;
+  ArrayBlockingQueue<Object> prefixRequestArray;
+  ArrayBlockingQueue<Object> resultsOutputArray;
   int id;
   String passageName;
 
-  public Worker(String[] words,int id,ArrayBlockingQueue prefix, ArrayBlockingQueue results){
+  public Worker(String file, int id, ArrayBlockingQueue prefix, ArrayBlockingQueue results) {
+
+    ArrayList<String> wordList = new ArrayList<>();
+
+    File f = new File(file);
+
+    Scanner reader;
+    try {
+      reader = new Scanner(f);
+
+      while (reader.hasNext()) {
+        String word = reader.next();
+        word = word.toLowerCase();
+        if (word.matches("[a-z]+")) {
+          wordList.add(word);
+        }
+        else if ((word.substring(0, word.length()-1)).matches("[a-z]+")) {
+          wordList.add(word.substring(0, word.length() - 1));
+        }
+      }
+      reader.close();
+
+    } catch (FileNotFoundException e) {}
+
+    String[] words = new String[wordList.size()];
+    words = wordList.toArray(words);
+
     this.textTrieTree=new Trie(words);
     this.prefixRequestArray=prefix;
     this.resultsOutputArray=results;
     this.id=id;
-    this.passageName="Passage-"+Integer.toString(id)+".txt";//put name of passage here
+    this.passageName=file;//put name of passage here
   }
 
   public void run() {

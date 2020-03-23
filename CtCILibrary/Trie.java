@@ -26,7 +26,7 @@ public class Trie
         for (String word : list) {
             root.addWord(word);
         }
-    }    
+    }
 
     /* Checks whether this trie contains a string with the prefix passed
      * in as argument.

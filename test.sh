@@ -9,4 +9,4 @@ gcc -std=c99 -D_GNU_SOURCE msgrcv_lwr.c -o msgrcv
 ./msgsnd con
 java -cp . -Djava.library.path=. edu.cs300.MessageJNI
 ./msgrcv
-java edu.cs300.ParallelTextSearch con
+java edu.cs300.PassageProcessor con pre
