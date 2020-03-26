@@ -68,7 +68,7 @@ public class Trie
         for (TrieNode child : node.children.values()) {
             StringBuffer copy = new StringBuffer(prefix);
             StringBuffer temp = longestWord(copy.append(child.character), child);
-            if (temp.length() > maxLen) {
+            if (temp.length() >= maxLen) {
                 longest = temp;
                 maxLen = temp.length();
             }

@@ -61,7 +61,7 @@ class Worker extends Thread {
           resultsOutputArray.put(passageName+":"+prefix+" not found");
         } else{
           //System.out.println("Worker-"+this.id+" "+req.requestID+":"+ prefix+" ==> "+word);
-          resultsOutputArray.put(passageName+":"+prefix+" found. Longest word with "+prefix+ " is "+longest);
+          resultsOutputArray.put("Worker-"+this.id+" "+);
         }
       } catch(InterruptedException e){
         System.out.println(e.getMessage());
