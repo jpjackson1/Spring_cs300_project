@@ -7,7 +7,6 @@ import java.util.Scanner;
 import java.util.*;
 
 public class PassageProcessor {
-    
     public static void main(String args[]) throws IOException {
             
         try {
@@ -35,24 +34,35 @@ public class PassageProcessor {
             while(true) {
                 SearchRequest search = MessageJNI.readPrefixRequestMsg();
                 String prefix = search.prefix;
-                int id = search.requestID;
+                int prefixId = search.requestID;
 
-                if (id == 0) break;
+                if (prefixId == 0) break;
 
                 try {
-                    for (int i = 0; i < passageCount; i++) workers[i].put(prefix);
+                    for (int i = 0; i < passageCount; i++) workers[i].put(search);
                 } catch (Exception e) {}
 
                 int passageIndex = 0;
                 while (passageIndex < passageCount) {
                     try {
-                        String results = (String)resultsOutputArray.take();
-                        System.out.println("results:"+results);
-                        MessageJNI.writeLongestWordResponseMsg(id, prefix, passageIndex, passageName, longestWord, passageCount, present);
+                        LongestWord results = (LongestWord)resultsOutputArray.take();
+                        int passageId = results.passageid;
+                        String longestWord = results.word;
+                        String passageName = passages.get(passageId);
+
+                        if (results.word == "") {
+                            MessageJNI.writeLongestWordResponseMsg(prefixId, prefix, passageId+1, passageName, longestWord, passageCount, 0);
+                        }
+                        else {
+                            MessageJNI.writeLongestWordResponseMsg(prefixId, prefix, passageId+1, passageName, longestWord, passageCount, 1);
+                        }
+
                         passageIndex++;
                     } catch (InterruptedException e) {};
                 }
             }
+
+            System.out.println("Done");
 
         } catch(FileNotFoundException e) {} 
         catch(IOException e) {}

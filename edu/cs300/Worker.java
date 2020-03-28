@@ -16,31 +16,33 @@ class Worker extends Thread {
 
   public Worker(String file, int id, ArrayBlockingQueue prefix, ArrayBlockingQueue results) {
 
+    // Parse passage file into individual words
     ArrayList<String> wordList = new ArrayList<>();
-
     File f = new File(file);
-
     Scanner reader;
     try {
       reader = new Scanner(f);
 
       while (reader.hasNext()) {
-        String word = reader.next();
-        word = word.toLowerCase();
-        if (word.matches("[a-z]+")) {
+        String token = reader.next();
+        token = token.toLowerCase();
+
+        if (token.contains("-") || token.contains("\'")) continue;
+
+        for (String word : token.split("\\P{Alpha}+")) {
           wordList.add(word);
         }
-        else if ((word.substring(0, word.length()-1)).matches("[a-z]+")) {
-          wordList.add(word.substring(0, word.length() - 1));
-        }
+
       }
       reader.close();
 
     } catch (FileNotFoundException e) {}
 
+    // Convert wordList to array of strings
     String[] words = new String[wordList.size()];
     words = wordList.toArray(words);
 
+    // Create Trie with the words and initialize variables
     this.textTrieTree=new Trie(words);
     this.prefixRequestArray=prefix;
     this.resultsOutputArray=results;
@@ -49,24 +51,36 @@ class Worker extends Thread {
   }
 
   public void run() {
+    
     System.out.println("Worker-"+this.id+" ("+this.passageName+") thread started ...");
-    //while (true){
+    while(true) {
       try {
-        String prefix=(String)this.prefixRequestArray.take();
-        //boolean found = this.textTrieTree.contains(prefix);
-        String longest = this.textTrieTree.findLongestWord(prefix);
+        // Take prefix from the array blocking queue and initialize values of search
+        SearchRequest search = (SearchRequest)this.prefixRequestArray.take();
+        String prefix = search.prefix;
+        int requestId = search.requestID;
+
+        // Find longest word in trie starting with given prefix
+        System.out.println("before finding word.");
+        String lword = this.textTrieTree.findLongestWord(prefix);
+        System.out.println("after finding word.");
+        LongestWord longest = new LongestWord(this.id, lword);
         
-        if (longest == "") {
-          //System.out.println("Worker-"+this.id+" "+req.requestID+":"+ prefix+" ==> not found ");
-          resultsOutputArray.put(passageName+":"+prefix+" not found");
+        // Print results
+        if (lword == "") {
+          System.out.println("Worker-"+this.id+" "+requestId+":"+ prefix+" ==> not found ");
         } else{
-          //System.out.println("Worker-"+this.id+" "+req.requestID+":"+ prefix+" ==> "+word);
-          resultsOutputArray.put("Worker-"+this.id+" "+);
+          System.out.println("Worker-"+this.id+" "+requestId+":"+ prefix+" ==> "+longest.word);
         }
+
+        // Send message back to queue
+        resultsOutputArray.put(longest);
+
+
       } catch(InterruptedException e){
         System.out.println(e.getMessage());
       }
-    //}
+    }
   }
 
 }

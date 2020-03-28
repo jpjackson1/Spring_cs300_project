@@ -8,7 +8,7 @@
 // Declare the message structure
 
 typedef struct prefixbuf {
-	long mtype;
+  long mtype;
   int id;
   char prefix[WORD_LENGTH];
 
