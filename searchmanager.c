@@ -139,9 +139,9 @@ int main(int argc, char **argv) {
 
         for (int i = 0; i < ret_count; i++) {
             if (rbuf_array[i].present == 1)
-                fprintf(stderr,"%ld, %d of %d, %s, size=%d\n", rbuf_array[i].mtype, rbuf_array[i].index,rbuf_array[i].count,rbuf_array[i].longest_word, ret);
+                fprintf(stderr,"%ld, %d of %d, %s, size=%d\n", rbuf_array[i].mtype, rbuf_array[i].index+1,rbuf_array[i].count,rbuf_array[i].longest_word, ret);
             else
-                fprintf(stderr,"%ld, %d of %d, not found, size=%d\n", rbuf_array[i].mtype, rbuf_array[i].index,rbuf_array[i].count, ret);
+                fprintf(stderr,"%ld, %d of %d, not found, size=%d\n", rbuf_array[i].mtype, rbuf_array[i].index+1,rbuf_array[i].count, ret);
         }
 
         message_id++;

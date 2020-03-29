@@ -51,10 +51,10 @@ public class PassageProcessor {
                         String passageName = passages.get(passageId);
 
                         if (results.word == "") {
-                            MessageJNI.writeLongestWordResponseMsg(prefixId, prefix, passageId+1, passageName, longestWord, passageCount, 0);
+                            MessageJNI.writeLongestWordResponseMsg(prefixId, prefix, passageId, passageName, longestWord, passageCount, 0);
                         }
                         else {
-                            MessageJNI.writeLongestWordResponseMsg(prefixId, prefix, passageId+1, passageName, longestWord, passageCount, 1);
+                            MessageJNI.writeLongestWordResponseMsg(prefixId, prefix, passageId, passageName, longestWord, passageCount, 1);
                         }
 
                         passageIndex++;

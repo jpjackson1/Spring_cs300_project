@@ -61,9 +61,7 @@ class Worker extends Thread {
         int requestId = search.requestID;
 
         // Find longest word in trie starting with given prefix
-        System.out.println("before finding word.");
         String lword = this.textTrieTree.findLongestWord(prefix);
-        System.out.println("after finding word.");
         LongestWord longest = new LongestWord(this.id, lword);
         
         // Print results
