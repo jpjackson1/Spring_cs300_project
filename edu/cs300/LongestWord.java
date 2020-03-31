@@ -1,4 +1,4 @@
-package CtCILibrary;
+package edu.cs300;
 
 public class LongestWord {
 

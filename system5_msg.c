@@ -61,8 +61,8 @@ JNIEXPORT jstring JNICALL Java_edu_cs300_MessageJNI_readStringMsg
         perror("(msgget)");
         fprintf(stderr, "Error msgget: %s\n", strerror( errnum ));
     }
-    else
-        fprintf(stderr, "msgget: msgget succeeded: msgqid = %d\n", msqid);
+    //else
+        //fprintf(stderr, "msgget: msgget succeeded: msgqid = %d\n", msqid);
 
     // msgrcv to receive message
     int ret = msgrcv(msqid, &rbuf, WORD_LENGTH, 1, 0);//TODO what is the correct length here
@@ -113,7 +113,7 @@ JNIEXPORT jobject JNICALL Java_edu_cs300_MessageJNI_readPrefixRequestMsg
         fprintf(stderr, "Error receiving msg: %s\n", strerror( errnum ));
         strcpy(rbuf.prefix,"error");//return error string to calling program
     }
-    fprintf(stderr,"id=%d prefix=%s\n", rbuf.id,rbuf.prefix);
+    //fprintf(stderr,"id=%d prefix=%s\n", rbuf.id,rbuf.prefix);
 
     // Create the object of the class UserData
     jclass searchRequestClass = (*env)->FindClass(env,"edu/cs300/SearchRequest");
@@ -152,8 +152,8 @@ JNIEXPORT void JNICALL Java_edu_cs300_MessageJNI_writeLongestWordResponseMsg
         perror("(msgget)");
         fprintf(stderr, "Error sending msg: %s\n", strerror( errnum ));
     }
-    else
-        fprintf(stderr, "msgget: msgget succeeded: msgqid = %d\n", msqid);
+    //else
+        //fprintf(stderr, "msgget: msgget succeeded: msgqid = %d\n", msqid);
 
     const char *prefix = (*env)->GetStringUTFChars(env,prefixStr, NULL);
     const char *passageName = (*env)->GetStringUTFChars(env,passageNameStr, NULL);
@@ -187,8 +187,8 @@ JNIEXPORT void JNICALL Java_edu_cs300_MessageJNI_writeLongestWordResponseMsg
         fprintf(stderr, "Error sending msg: %s\n", strerror( errnum ));
         exit(1);
     }
-    else
-        fprintf(stderr,"Message: \"%d:%s\" Sent\n",rbuf.index, rbuf.longest_word);
+    //else
+        //fprintf(stderr,"Message: \"%d:%s\" Sent\n",rbuf.index, rbuf.longest_word);
 
 
     (*env)->ReleaseStringUTFChars(env, prefixStr, prefix);

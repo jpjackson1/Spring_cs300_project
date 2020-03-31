@@ -1,5 +1,4 @@
 package edu.cs300;
-import CtCILibrary.*;
 import java.util.concurrent.*;
 import java.util.ArrayList;
 import java.io.*;
@@ -26,21 +25,26 @@ public class PassageProcessor {
             ArrayBlockingQueue[] workers = new ArrayBlockingQueue[passageCount];
             ArrayBlockingQueue resultsOutputArray=new ArrayBlockingQueue(passageCount*10);
 
+            Worker[] wArray = new Worker[passageCount];
             for (int i = 0; i < passageCount; i++) {
                 workers[i] = new ArrayBlockingQueue<>(10);
-                new Worker(passages.get(i), i, workers[i], resultsOutputArray).start();
+                wArray[i] = new Worker(passages.get(i), i, workers[i], resultsOutputArray);
+                wArray[i].start();
             }
 
+            SearchRequest search;
             while(true) {
-                SearchRequest search = MessageJNI.readPrefixRequestMsg();
+                search = MessageJNI.readPrefixRequestMsg();
                 String prefix = search.prefix;
                 int prefixId = search.requestID;
 
-                if (prefixId == 0) break;
+                System.out.println("**prefix(" + prefixId + ") " + prefix + " recieved");
 
                 try {
                     for (int i = 0; i < passageCount; i++) workers[i].put(search);
                 } catch (Exception e) {}
+
+                if (prefixId == 0) break;
 
                 int passageIndex = 0;
                 while (passageIndex < passageCount) {
@@ -51,7 +55,7 @@ public class PassageProcessor {
                         String passageName = passages.get(passageId);
 
                         if (results.word == "") {
-                            MessageJNI.writeLongestWordResponseMsg(prefixId, prefix, passageId, passageName, longestWord, passageCount, 0);
+                            MessageJNI.writeLongestWordResponseMsg(prefixId, prefix, passageId, passageName, "----", passageCount, 0);
                         }
                         else {
                             MessageJNI.writeLongestWordResponseMsg(prefixId, prefix, passageId, passageName, longestWord, passageCount, 1);
@@ -62,9 +66,11 @@ public class PassageProcessor {
                 }
             }
 
-            System.out.println("Done");
+            for (int i = 0; i < passageCount; i++) wArray[i].join();
 
-        } catch(FileNotFoundException e) {} 
-        catch(IOException e) {}
+            System.out.println("Terminating ...");
+            
+
+        } catch(Exception e) {}
     }
 }
