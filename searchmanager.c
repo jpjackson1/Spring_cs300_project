@@ -45,8 +45,13 @@ int prefix_count; // Will not change from initial value set in main
 int total_response; // Will not change from initial value set in main
 char **prefixes; // Will not change from initial value set in main
 
+void sigIntPre(int signalNumber) {
+    for (int i = 0; i < prefix_count; i++) {
+        printf("%s - pending\n", prefixes[i]);
+    }
+}
 
-void sigintHandler(int signalNumber) {
+void sigIntPost(int signalNumber) {
 
     int *complete = malloc(sizeof(int));
     printf("\n");
@@ -73,7 +78,6 @@ int main(int argc, char **argv) {
     prefix_buf sbuf;
     response_buf rbuf;
     size_t buf_length;
-    signal(SIGINT, sigintHandler);
 
     // Return error if no prefixes given
     if (argc <= 1) {
@@ -99,6 +103,7 @@ int main(int argc, char **argv) {
         sem_init(&progress[j], 0, 0);
         j++;
     }
+    signal(SIGINT, sigIntPre);
 
     // Send message for each prefix with a delay of the given wait time in between each message
     response_buf* rbuf_array;
@@ -150,6 +155,7 @@ int main(int argc, char **argv) {
     // Get count of responses expected
     total_response = rbuf.count;
     sem_post(&progress[0]); // increment progress value of first prefix
+    signal(SIGINT, sigIntPost);
 
     // Create array that can fit each response buf in it
     rbuf_array = malloc(sizeof(response_buf) * total_response);
