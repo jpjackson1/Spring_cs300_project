@@ -15,4 +15,12 @@ public class SearchRequest {
     return this.requestID+" "+this.prefix;
   }
 
+  int getId() {
+    return requestID;
+  }
+
+  String getPrefix() {
+    return prefix;
+  }
+
 }

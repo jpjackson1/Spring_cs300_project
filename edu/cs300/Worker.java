@@ -27,8 +27,10 @@ class Worker extends Thread {
         String token = reader.next();
         token = token.toLowerCase();
 
+        // Throw out words containing - or '
         if (token.contains("-") || token.contains("\'")) continue;
 
+        // Split words on non alphabetic delimiters and add to list
         for (String word : token.split("\\P{Alpha}+")) {
           wordList.add(word);
         }
@@ -57,9 +59,10 @@ class Worker extends Thread {
       try {
         // Take prefix from the array blocking queue and initialize values of search
         SearchRequest search = (SearchRequest)this.prefixRequestArray.take();
-        String prefix = search.prefix;
-        int requestId = search.requestID;
+        String prefix = search.getPrefix();
+        int requestId = search.getId();
 
+        // End thread loop when 0 id is recieved
         if (requestId == 0) break;
 
         // Find longest word in trie starting with given prefix
@@ -70,7 +73,7 @@ class Worker extends Thread {
         if (lword == "") {
           System.out.println("Worker-"+this.id+" "+requestId+":"+ prefix+" ==> not found ");
         } else{
-          System.out.println("Worker-"+this.id+" "+requestId+":"+ prefix+" ==> "+longest.word);
+          System.out.println("Worker-"+this.id+" "+requestId+":"+ prefix+" ==> "+longest.getWord());
         }
 
         // Send message back to queue

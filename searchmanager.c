@@ -40,8 +40,8 @@ strlcpy(char       *dst,        /* O - Destination string */
     return (srclen);
 }
 
-sem_t *progress;
-int prefix_count; // will not change from initial value set in main
+sem_t *progress; // Protected shared memory to keep track of progress of each prefix
+int prefix_count; // Will not change from initial value set in main
 int total_response; // Will not change from initial value set in main
 char **prefixes; // Will not change from initial value set in main
 
@@ -147,18 +147,21 @@ int main(int argc, char **argv) {
         }
     } while ((ret < 0 ) && (errno == 4));
 
+    // Get count of responses expected
     total_response = rbuf.count;
-    sem_post(&progress[0]);
+    sem_post(&progress[0]); // increment progress value of first prefix
 
     // Create array that can fit each response buf in it
     rbuf_array = malloc(sizeof(response_buf) * total_response);
 
+    // Store response in array
     if (rbuf.index >= 0 && rbuf.index < total_response)
         rbuf_array[rbuf.index] = rbuf;
     else
         printf("Array indexing problem.\n");
 
     
+    // Loop for rest of responses
     for (int i = 1; i < total_response; i++) {
         // Message Recieve
         int ret;
@@ -172,23 +175,25 @@ int main(int argc, char **argv) {
             }
         } while ((ret < 0 ) && (errno == 4));
 
+        // Store response in order and increment progress
         rbuf_array[rbuf.index] = rbuf;
         sem_post(&progress[0]);
     }
 
+    // Print results in order
     printf("Report \"%s\"\n", sbuf.prefix);
     for (int i = 0; i < total_response; i++) {
         if (rbuf_array[i].present == 1)
-            fprintf(stderr,"%ld, %d of %d, %s, size=%d\n", rbuf_array[i].mtype, rbuf_array[i].index+1,rbuf_array[i].count,rbuf_array[i].longest_word, ret);
+            fprintf(stderr, "Passage %d - %s - %s\n", rbuf_array[i].index, rbuf_array[i].location_description, rbuf_array[i].longest_word);
         else
-            fprintf(stderr,"%ld, %d of %d, not found, size=%d\n", rbuf_array[i].mtype, rbuf_array[i].index+1,rbuf_array[i].count, ret);
+            fprintf(stderr, "Passage %d - %s - no word found\n", rbuf_array[i].index, rbuf_array[i].location_description);
     }
 
     message_id++;
-    sleep(wait_time);
+    sleep(wait_time); // Wait specified time between messages
 
 
-
+    // Loop for rest of prefix requests
     for (int i = 1; i < prefix_count; i++) {
         // Message Send
         key = ftok(CRIMSON_ID,QUEUE_NUMBER);
@@ -198,8 +203,6 @@ int main(int argc, char **argv) {
             perror("(msgget)");
             fprintf(stderr, "Error msgget: %s\n", strerror( errnum ));
         }
-        //else
-            //fprintf(stderr, "msgget: msgget succeeded: msgqid = %d\n", msqid);
 
         // We'll send message type 1
         sbuf.mtype = 1;
@@ -232,23 +235,26 @@ int main(int argc, char **argv) {
                 }
             } while ((ret < 0 ) && (errno == 4));
 
+            // Store and increment
             rbuf_array[rbuf.index] = rbuf;
             sem_post(&progress[i]);
         }
 
+        // Print in order
         printf("Report \"%s\"\n", sbuf.prefix);
         for (int j = 0; j < total_response; j++) {
             if (rbuf_array[j].present == 1)
-                fprintf(stderr,"%ld, %d of %d, %s, size=%d\n", rbuf_array[j].mtype, rbuf_array[j].index+1,rbuf_array[j].count,rbuf_array[j].longest_word, ret);
+                fprintf(stderr, "Passage %d - %s - %s\n", rbuf_array[j].index, rbuf_array[j].location_description, rbuf_array[j].longest_word);
             else
-                fprintf(stderr,"%ld, %d of %d, not found, size=%d\n", rbuf_array[j].mtype, rbuf_array[j].index+1,rbuf_array[j].count, ret);
+                fprintf(stderr, "Passage %d - %s - no word found\n", rbuf_array[j].index, rbuf_array[j].location_description);
         }
 
         message_id++;
-        sleep(wait_time);
+        sleep(wait_time); // Wait
     }
 
-    // We'll send message type 1
+
+    // Send message with empty string and 0 id to end passage processor
     sbuf.mtype = 1;
     strlcpy(sbuf.prefix, "   ", WORD_LENGTH);
     sbuf.id=0;
@@ -267,6 +273,10 @@ int main(int argc, char **argv) {
 
     printf("Exiting ...\n");
 
+    // Free allocated memory
+    free(progress);
+    for (int i = 0; i < prefix_count; i++) free(prefixes[i]);
+    free(prefixes);
     free(rbuf_array);
 
     return 0;
